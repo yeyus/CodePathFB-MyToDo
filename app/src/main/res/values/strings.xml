@@ -4,4 +4,5 @@
     <string name="add_item">Add a new Item...</string>
     <string name="add_button">Add</string>
     <string name="edit_label">Edit</string>
+    <string name="due_date">Due date</string>
 </resources>
