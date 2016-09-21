@@ -36,7 +36,9 @@ public class EditItemActivity extends AppCompatActivity {
         etItemValue.setText(editingTask.name);
 
         Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(editingTask.dueAt.getTime());
+        if (editingTask.dueAt != null) {
+            c.setTimeInMillis(editingTask.dueAt.getTime());
+        }
 
         dpDue.init(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH), new DatePicker.OnDateChangedListener() {
             @Override
