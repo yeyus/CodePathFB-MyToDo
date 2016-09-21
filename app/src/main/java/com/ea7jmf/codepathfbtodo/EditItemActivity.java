@@ -4,9 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.EditText;
 
 import com.ea7jmf.codepathfbtodo.model.Task;
+
+import java.util.Calendar;
+import java.util.Date;
 
 public class EditItemActivity extends AppCompatActivity {
 
@@ -15,6 +19,7 @@ public class EditItemActivity extends AppCompatActivity {
     Task editingTask;
 
     EditText etItemValue;
+    DatePicker dpDue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +32,20 @@ public class EditItemActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_edit_item);
         etItemValue = (EditText) findViewById(R.id.etItemValue);
+        dpDue = (DatePicker) findViewById(R.id.dpDue);
         etItemValue.setText(editingTask.name);
+
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(editingTask.dueAt.getTime());
+
+        dpDue.init(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH), new DatePicker.OnDateChangedListener() {
+            @Override
+            public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                Calendar c = Calendar.getInstance();
+                c.set(year, monthOfYear, dayOfMonth);
+                editingTask.dueAt = new Date(c.getTimeInMillis());
+            }
+        });
     }
 
     public void onEdit(View view) {

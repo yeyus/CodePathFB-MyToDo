@@ -5,10 +5,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.ea7jmf.codepathfbtodo.adapters.TaskAdapter;
 import com.ea7jmf.codepathfbtodo.model.Task;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int EDIT_REQUEST_CODE = 1;
 
     List<Task> todoItems;
-    ArrayAdapter<Task> itemsAdapter;
+    TaskAdapter itemsAdapter;
     ListView lvItems;
     EditText etEditText;
 
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void populateArrayItems() {
         readItems();
-        itemsAdapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todoItems);
+        itemsAdapter = new TaskAdapter(this, todoItems);
     }
 
     private void readItems() {
