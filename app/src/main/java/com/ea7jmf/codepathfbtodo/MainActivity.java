@@ -9,18 +9,17 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import org.apache.commons.io.FileUtils;
+import com.ea7jmf.codepathfbtodo.model.Task;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final int EDIT_REQUEST_CODE = 1;
 
-    ArrayList<String> todoItems;
-    ArrayAdapter<String> itemsAdapter;
+    List<Task> todoItems;
+    ArrayAdapter<Task> itemsAdapter;
     ListView lvItems;
     EditText etEditText;
 
@@ -38,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent i = new Intent(MainActivity.this, EditItemActivity.class);
-                i.putExtra("text", todoItems.get(position));
-                i.putExtra("position", position);
+                i.putExtra("taskId", todoItems.get(position).getId());
+                i.putExtra("taskPosition", position);
                 startActivityForResult(i, EDIT_REQUEST_CODE);
             }
         });
@@ -47,9 +46,9 @@ public class MainActivity extends AppCompatActivity {
         lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                todoItems.remove(position);
+                Task removedTask = todoItems.remove(position);
+                removedTask.delete();
                 itemsAdapter.notifyDataSetChanged();
-                writeItems();
                 return true;
             }
         });
@@ -57,44 +56,29 @@ public class MainActivity extends AppCompatActivity {
 
     private void populateArrayItems() {
         readItems();
-        itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, todoItems);
+        itemsAdapter = new ArrayAdapter<Task>(this, android.R.layout.simple_list_item_1, todoItems);
     }
 
     private void readItems() {
-        File filesDir = getFilesDir();
-        File file = new File(filesDir, "todo.txt");
-        try {
-            todoItems = new ArrayList<String>(FileUtils.readLines(file));
-        } catch (IOException e) {
-
-        }
-    }
-
-    private void writeItems() {
-        File filesDir = getFilesDir();
-        File file = new File(filesDir, "todo.txt");
-        try {
-            FileUtils.writeLines(file, todoItems);
-        } catch (IOException e) {
-
-        }
+        todoItems = Task.getAll();
     }
 
     public void onAddItem(View view) {
-        itemsAdapter.add(etEditText.getText().toString());
+        Task t = new Task();
+        t.name = etEditText.getText().toString();
+        itemsAdapter.add(t);
         etEditText.setText("");
-        writeItems();
+        t.save();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == EDIT_REQUEST_CODE) {
-            String itemText = data.getExtras().getString("text");
-            int itemPosition = data.getExtras().getInt("position", -1);
+            long modifiedTaskId = data.getExtras().getLong("taskId");
+            int modifiedTaskPosition = data.getExtras().getInt("taskPosition", -1);
 
-            todoItems.set(itemPosition, itemText);
+            todoItems.set(modifiedTaskPosition, Task.getById(modifiedTaskId));
             itemsAdapter.notifyDataSetChanged();
-            writeItems();
         }
     }
 }
