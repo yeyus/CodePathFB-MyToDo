@@ -1,5 +1,6 @@
 package com.ea7jmf.codepathfbtodo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final int EDIT_REQUEST_CODE = 1;
+
     ArrayList<String> todoItems;
     ArrayAdapter<String> itemsAdapter;
     ListView lvItems;
@@ -30,6 +33,16 @@ public class MainActivity extends AppCompatActivity {
         lvItems = (ListView) findViewById(R.id.lvItems);
         lvItems.setAdapter(itemsAdapter);
         etEditText = (EditText) findViewById(R.id.etEditText);
+
+        lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent i = new Intent(MainActivity.this, EditItemActivity.class);
+                i.putExtra("text", todoItems.get(position));
+                i.putExtra("position", position);
+                startActivityForResult(i, EDIT_REQUEST_CODE);
+            }
+        });
 
         lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -71,5 +84,17 @@ public class MainActivity extends AppCompatActivity {
         itemsAdapter.add(etEditText.getText().toString());
         etEditText.setText("");
         writeItems();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == EDIT_REQUEST_CODE) {
+            String itemText = data.getExtras().getString("text");
+            int itemPosition = data.getExtras().getInt("position", -1);
+
+            todoItems.set(itemPosition, itemText);
+            itemsAdapter.notifyDataSetChanged();
+            writeItems();
+        }
     }
 }
