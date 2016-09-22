@@ -1,7 +1,7 @@
 package com.ea7jmf.codepathfbtodo;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -9,12 +9,13 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.ea7jmf.codepathfbtodo.adapters.TaskAdapter;
+import com.ea7jmf.codepathfbtodo.fragments.EditTaskDialogFragment;
 import com.ea7jmf.codepathfbtodo.model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements EditTaskDialogFragment.EditTaskDialogListener {
 
     public static final int EDIT_REQUEST_CODE = 1;
 
@@ -36,10 +37,11 @@ public class MainActivity extends AppCompatActivity {
         lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(MainActivity.this, EditItemActivity.class);
-                i.putExtra("taskId", todoItems.get(position).getId());
-                i.putExtra("taskPosition", position);
-                startActivityForResult(i, EDIT_REQUEST_CODE);
+//                Intent i = new Intent(MainActivity.this, EditItemActivity.class);
+//                i.putExtra("taskId", todoItems.get(position).getId());
+//                i.putExtra("taskPosition", position);
+//                startActivityForResult(i, EDIT_REQUEST_CODE);
+                showEditDialog(todoItems.get(position).getId(), position);
             }
         });
 
@@ -54,6 +56,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void onAddItem(View view) {
+        Task t = new Task();
+        t.name = etEditText.getText().toString();
+        itemsAdapter.add(t);
+        etEditText.setText("");
+        t.save();
+    }
+
     private void populateArrayItems() {
         readItems();
         itemsAdapter = new TaskAdapter(this, todoItems);
@@ -63,22 +73,15 @@ public class MainActivity extends AppCompatActivity {
         todoItems = Task.getAll();
     }
 
-    public void onAddItem(View view) {
-        Task t = new Task();
-        t.name = etEditText.getText().toString();
-        itemsAdapter.add(t);
-        etEditText.setText("");
-        t.save();
+    private void showEditDialog(long taskId, int taskPosition) {
+        FragmentManager fm = getSupportFragmentManager();
+        EditTaskDialogFragment editNameDialogFragment = EditTaskDialogFragment.newInstance(taskId, taskPosition);
+        editNameDialogFragment.show(fm, "fragment_edit_task");
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK && requestCode == EDIT_REQUEST_CODE) {
-            long modifiedTaskId = data.getExtras().getLong("taskId");
-            int modifiedTaskPosition = data.getExtras().getInt("taskPosition", -1);
-
-            todoItems.set(modifiedTaskPosition, Task.getById(modifiedTaskId));
-            itemsAdapter.notifyDataSetChanged();
-        }
+    public void onFinishEditDialog(long taskId, int taskPosition) {
+        todoItems.set(taskPosition, Task.getById(taskId));
+        itemsAdapter.notifyDataSetChanged();
     }
 }
